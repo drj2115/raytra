@@ -58,7 +58,7 @@ int Bbox::intersect(const Ray &ray, Intersection &it){
 			return 0;
 
 		it.set(tmin, ray.ori + ray.dir*tmin, n);
-		if(id != -1)
+		if (id != -1)
 			it.id = id;
 
 		return 1;

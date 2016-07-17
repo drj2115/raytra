@@ -31,21 +31,11 @@ void Camera::set_uvw(const Vec &d)
 	(v = u.cross(d)).normalize();
 }
 
-Ray Camera::gen_ray(const double i, const double j)
+Ray Camera::gen_ray(const double i, const double j, const double offset_1 = .5,
+						const double offset_2 = .5)
 {
-	Vec dir = u*iw*((i + .5)/pw - .5) + v*ih*(.5 - (j + .5)/ph) - w*f_len;
-
-	dir.normalize();
-	return Ray(eye, dir);
-}
-
-Ray Camera::jitter(const double i, const double j, const int p, const int q, const int samples)
-{
-	double rand_1 = (rand()%100)/100.;
-	double rand_2 = (rand()%100)/100.;
-	double U = iw*((i + ((double)(p + rand_1))/samples)/pw - .5);
-	double V = ih*(.5 - (j + ((double)(q + rand_2))/samples)/ph);
-	Vec dir = u*U + v*V - w*f_len;
+	Vec dir = u*iw*((i + offset_1)/pw - .5) + v*ih*(.5 - (j + offset_2)/ph)
+								- w*f_len;
 	dir.normalize();
 	return Ray(eye, dir);
 }
@@ -77,7 +67,12 @@ void Camera::render(vector<Object *> &objects, vector<Plane *> &planes,
 			if (p_samples > 1) {
 				for (int p = 0; p < p_samples; ++p) {
 					for (int q = 0; q < p_samples; ++q) {
-						color += ray_color(jitter(x,y,p,q,p_samples),
+						double r1 = (rand()%100)/100.;
+						double r2 = (rand()%100)/100.;
+						Ray r = gen_ray(x, y,
+							(p + r1)/p_samples,
+							(q + r2)/p_samples);
+						color += ray_color(r,
 								MAX_DEPTH,
 								lights,
 								objects,
@@ -100,7 +95,9 @@ void Camera::render(vector<Object *> &objects, vector<Plane *> &planes,
 							bbox_flag);
 			}
 
-			set_pixel(x, y, color.x, color.y, color.z);
+			pixels[y][x].r = color.x;
+			pixels[y][x].g = color.y;
+			pixels[y][x].b = color.z;
 		}
 	}
 }
@@ -118,7 +115,7 @@ Vec shading(const Ray &ray, const Vec &ie, const Vec &n, const Vec &il,
 	int shadowed = 0;
 
 	if (root) {
-		shadowed = root->intersect(ray, it, flag);
+		shadowed = root->intersect(ray, it, flag) && it.t < max_t;
 	} else {
 		for (unsigned int i = 0; i < objects.size(); ++i) {
 			if (objects[i]->intersect(ray, it, flag)) {
@@ -143,7 +140,6 @@ Vec shading(const Ray &ray, const Vec &ie, const Vec &n, const Vec &il,
 
 	return !shadowed ? m->phong_shading(ie, n, il, light->rgb) :
 							Vec();
-
 }
 
 Vec Camera::ray_color(const Ray &r, int depth, const vector<Light *> lights,

@@ -15,7 +15,7 @@ int Plane::intersect(const Ray &r, Intersection &it, int bboxOnly){
 
 	double numerator = -(r.ori.dot(n) + d);
 	double t = numerator / denominator;
-	if (t > 0) {
+	if (t > 0.0001) {
 		Vec p = r.ori + r.dir * t;
 		it.set(t, p, n);
 		return 1;

@@ -37,8 +37,8 @@ public:
 
 	void set_uvw(const Vec &d);
 
-	Ray gen_ray(const double i, const double j);
-	Ray jitter(const double i, const double j, const int p, const int q, const int samples);
+	Ray gen_ray(const double i, const double j, const double offset_1,
+						const double offset_2);
 
 	void render(vector<Object *> &objects, vector<Plane *> &planes,
 						const vector<Light *> &lights,
@@ -54,11 +54,11 @@ public:
 						const int s_samples,
 						const int flag);
 
-	void set_pixel(const int x, const int y, const double r, const double g, const double b)
-	{
-		Rgba &px = pixels[y][x];
-		px.r = r; px.g = g; px.b = b;
-	}
+void set_pixel(const int x, const int y, const double r, const double g, const double b)
+{
+	Rgba &px = pixels[y][x];
+	px.r = r; px.g = g; px.b = b;
+}
 
 	void write_exr(const char *file_name);
 
