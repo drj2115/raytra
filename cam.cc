@@ -1,24 +1,5 @@
 #include "cam.h"
 
-void crop_rgb(Vec *rgb)
-{
-	if (!rgb)
-		return;
-
-	if (rgb->x > 1)
-		rgb->x = 1;
-	else if (rgb->x < 0)
-		rgb->x = 0;
-	if (rgb->y > 1)
-		rgb->y = 1;
-	else if (rgb->y < 0)
-		rgb->y = 0;
-	if (rgb->z > 1)
-		rgb->z = 1;
-	else if (rgb->z < 0)
-		rgb->z = 0;
-}
-
 Camera::Camera(void) {
 	f_len = iw = ih = pw = ph = 0;
 	eye = u = v = w = Vec();
@@ -50,7 +31,7 @@ void Camera::set_uvw(const Vec &d)
 	(v = u.cross(d)).normalize();
 }
 
-Ray Camera::gen_ray(double i, double j)
+Ray Camera::gen_ray(const double i, const double j)
 {
 	Vec dir = u*iw*((i + .5)/pw - .5) + v*ih*(.5 - (j + .5)/ph) - w*f_len;
 
@@ -58,14 +39,12 @@ Ray Camera::gen_ray(double i, double j)
 	return Ray(eye, dir);
 }
 
-Ray Camera::jitter(double i, double j, int p, int q, int samples)
+Ray Camera::jitter(const double i, const double j, const int p, const int q, const int samples)
 {
-	double l = -iw/2.0;
-	double t = ih/2.0;
 	double rand_1 = (rand()%100)/100.;
 	double rand_2 = (rand()%100)/100.;
-	double U = l + iw*(i + ((double)(p + rand_1))/samples)/pw;
-	double V = t - ih*(j + ((double)(q + rand_2))/samples)/ph;
+	double U = iw*((i + ((double)(p + rand_1))/samples)/pw - .5);
+	double V = ih*(.5 - (j + ((double)(q + rand_2))/samples)/ph);
 	Vec dir = u*U + v*V - w*f_len;
 	dir.normalize();
 	return Ray(eye, dir);
@@ -74,9 +53,9 @@ Ray Camera::jitter(double i, double j, int p, int q, int samples)
 void Camera::render(vector<Object *> &objects, vector<Plane *> &planes,
 						const vector<Light *> &lights,
 						BVH *root,
-						int &p_samples,
-						int &s_samples,
-						int &bbox_flag)
+						const int p_samples,
+						const int s_samples,
+						const int bbox_flag)
 {
 	double ps2 = p_samples*p_samples;
 	int stat_mod, num, count;
@@ -95,34 +74,30 @@ void Camera::render(vector<Object *> &objects, vector<Plane *> &planes,
 			}
 
 			Vec color;
-			if (p_samples < 2) {
-				color = ray_color(	gen_ray(x, y),
-							MAX_DEPTH,
-							lights,
-							objects,
-							planes,
-							root,
-							1,
-							s_samples,
-							bbox_flag);
-			} else {
+			if (p_samples > 1) {
 				for (int p = 0; p < p_samples; ++p) {
 					for (int q = 0; q < p_samples; ++q) {
-						Ray r = jitter(x, y, p, q,
-								p_samples);
-						color += ray_color(r,
+						color += ray_color(jitter(x,y,p,q,p_samples),
 								MAX_DEPTH,
 								lights,
 								objects,
 								planes,
 								root,
-								p_samples,
 								s_samples,
 								bbox_flag);
 					}
 				}
 
 				color /= ps2;
+			} else {
+				color = ray_color(	gen_ray(x, y),
+							MAX_DEPTH,
+							lights,
+							objects,
+							planes,
+							root,
+							s_samples,
+							bbox_flag);
 			}
 
 			set_pixel(x, y, color.x, color.y, color.z);
@@ -138,7 +113,7 @@ Vec shading(const Ray &ray, const Vec &ie, const Vec &n, const Vec &il,
 					const Light *light,
 					Material *m,
 					BVH *root,
-					int &flag)
+					const int flag)
 {
 	int shadowed = 0;
 	if (root) {
@@ -175,9 +150,8 @@ Vec Camera::ray_color(const Ray &r, int depth, const vector<Light *> lights,
 						const vector<Object *> objects,
 						const vector<Plane *> planes,
 						BVH *root,
-						int p_samples,
-						int s_samples,
-						int &flag)
+						const int s_samples,
+						const int flag)
 {
 	if (!depth)
 		return Vec(0.0, 0.0, 0.0);
@@ -266,7 +240,7 @@ Vec Camera::ray_color(const Ray &r, int depth, const vector<Light *> lights,
 				rgb2 += irr;
 			}
 
-			rgb2 /= s_samples;
+			rgb2 /= s_samples*s_samples;
 			continue;
 
 		/* Directional light: v is direction vector */
@@ -297,7 +271,7 @@ Vec Camera::ray_color(const Ray &r, int depth, const vector<Light *> lights,
 		Ray rray(p1, rfl);
 
 		retrgb += km*ray_color(rray, depth-1, lights, objects, planes,
-							root, 1, 1, flag);
+							root, 1, flag);
 	}
 
 	if (depth == MAX_DEPTH)

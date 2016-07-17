@@ -10,8 +10,6 @@
 #define EPSILON 0.000000001
 
 class Object {
-friend class BVH;
-
 	public:
 	Object(void) { mat = NULL; min = Vec(); max = Vec(); bbox = Bbox(); }
 

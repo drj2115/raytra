@@ -1,9 +1,6 @@
 /*
  * Dallas Jones
  * Columbia University - Computer Graphics
- *
- * Modified version of Qi Wang's Raytra Triangle class.
- * Copyright © 2016 Wang Qi. All rights reserved.
  */
 
 #ifndef _TRIANGLE_H
@@ -12,20 +9,21 @@
 #include <stdio.h>
 #include "object.h"
 
+
 class Triangle : public Object{
 public:
-	Triangle(void);
-	Triangle(const Vec &a, const Vec &b, const Vec &c, Material *&m);
-	Triangle(double x1, double y1, double z1,
-		 double x2, double y2, double z2,
-		 double x3, double y3, double z3, Material *&m);
+	Triangle(void) { p1 = p2 = p3 = n = Vec(); a = b = c = d = e = f = 0; }
+	Triangle(const Vec &a, const Vec &b, const Vec &c, Material *m);
+	Triangle(const double x1, const double y1, const double z1,
+		 const double x2, const double y2, const double z2,
+		 const double x3, const double y3, const double z3, Material *m);
 
-	virtual int intersect(const Ray &r, Intersection &it, int bboxOnly);
+	int intersect(const Ray &r, Intersection &it, int bboxOnly);
 
-	Vec get_normal(void){return n;}
+	Vec get_normal(void) { return n; }
 
 	Vec p1, p2, p3, n;
-	double a, b, c, d, e, f;
+	double a, b, c, d, e, f, g, h, i, j, k, l, eihf, gfdi, dheg, M, akjb,jcal,blkc,t;
 };
 
 #endif /* _TRIANGLE_H */

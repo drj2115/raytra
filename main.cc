@@ -1,8 +1,5 @@
 #include <stdlib.h>
 #include <vector>
-//#if defined(_OPENMP)
-//#	include <omp.h>
-//#endif
 
 #include "light.h"
 #include "object.h"

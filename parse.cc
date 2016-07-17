@@ -154,7 +154,6 @@ int parse(char *filename,	vector<Camera *> *cameras,
                                 goto err_out;
 			Plane *p = new Plane(a[0], a[1], a[2], a[3], mat);
 			planes->push_back(p);
-//                        objects->push_back(dynamic_cast<Object *>(p));
                         break;
 
 		/* Light */

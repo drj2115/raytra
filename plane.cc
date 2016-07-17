@@ -1,7 +1,7 @@
 #include "plane.h"
 
 Plane::Plane(double nx, double ny, double nz,
-			 double distance, Material *&m){
+			 double distance, Material *m){
 	n = Vec(nx, ny, nz);
 	n.normalize();
 	d = distance;

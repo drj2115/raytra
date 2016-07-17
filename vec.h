@@ -1,9 +1,6 @@
 /*
  * Dallas Jones
  * Columbia University - Computer Graphics
- *
- * Modified version of Qi Wang's Raytra Vector class.
- * Copyright © 2016 Wang Qi. All rights reserved.
  */
 
 #ifndef _VEC_H

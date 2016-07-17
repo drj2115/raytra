@@ -1,14 +1,14 @@
 #include "bvh.h"
 
-static int cmp_x(Object *a, Object *b) {
+inline int cmp_x(Object *a, Object *b) {
 	return a->bbox.max_p.x < b->bbox.max_p.x;
 }
 
-static int cmp_y(Object *a, Object *b) {
+inline int cmp_y(Object *a, Object *b) {
 	return a->bbox.max_p.y < b->bbox.max_p.y;
 }
 
-static int cmp_z(Object *a, Object *b) {
+inline int cmp_z(Object *a, Object *b) {
 	return a->bbox.max_p.z < b->bbox.max_p.z;
 }
 
@@ -51,6 +51,7 @@ void BVH::surround(const vector<Object*> &objects, int l, int r) {
 
 	minx = miny = minz = DBL_MAX;
 	maxx = maxy = maxz = -DBL_MAX;
+
 	for(int i = l; i <= r; ++i) {
 		minx = minx < objects[i]->min.x ? minx : objects[i]->min.x;
 		miny = miny < objects[i]->min.y ? miny : objects[i]->min.y;

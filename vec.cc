@@ -14,7 +14,7 @@ Vec::Vec(const Vec &p, const Vec &q)
 	z = q.z - p.z;
 }
 
-Vec Vec::operator +(const Vec &v) const
+Vec Vec::operator+(const Vec &v) const
 {
 	return Vec(x+v.x, y + v.y, z + v.z);
 }
@@ -27,17 +27,17 @@ Vec & Vec::operator +=(const Vec &v)
     return *this;
 }
 
-Vec Vec::operator -(const Vec &v) const
+Vec Vec::operator-(const Vec &v) const
 {
 	return Vec(x-v.x, y-v.y, z - v.z);
 }
 
-Vec Vec::operator *(double k) const
+Vec Vec::operator*(double k) const
 {
 	return Vec(x*k, y*k, z*k);
 }
 
-Vec & Vec::operator *=(double k)
+Vec& Vec::operator*=(double k)
 {
 	x *= k;
 	y *= k;
@@ -45,17 +45,17 @@ Vec & Vec::operator *=(double k)
     return *this;
 }
 
-Vec Vec::operator *(const Vec &v) const
+Vec Vec::operator*(const Vec &v) const
 {
 	return Vec(x*v.x, y*v.y, z*v.z);
 }
 
-Vec Vec::operator /(double k) const
+Vec Vec::operator/(double k) const
 {
 	return Vec(x/k, y/k, z/k);
 }
 
-Vec & Vec::operator /=(double k)
+Vec& Vec::operator/=(double k)
 {
 	x /= k;
 	y /= k;

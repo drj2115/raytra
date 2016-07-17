@@ -1,14 +1,9 @@
 #include "triangle.h"
 
-Triangle::Triangle(void)
-{
-	p1 = p2 = p3 = n = Vec();
-	a = b = c = d = e = f = 0.0;
-}
-
-Triangle::Triangle(double x1, double y1, double z1,
-		   double x2, double y2, double z2,
-		   double x3, double y3, double z3, Material *&m)
+Triangle::Triangle(const double x1, const double y1, const double z1,
+		   const double x2, const double y2, const double z2,
+		   const double x3, const double y3, const double z3,
+							Material *m)
 {
 	p1 = Vec(x1, y1, z1);
 	p2 = Vec(x2, y2, z2);
@@ -46,42 +41,43 @@ Triangle::Triangle(double x1, double y1, double z1,
 
 int Triangle::intersect(const Ray &r, Intersection &it, int bboxOnly)
 {
+
 	if (!bbox.intersect(r, it))
 		return 0;
 
 	if (bboxOnly)
 		return 1;
 
-	double g = r.dir.x;
-	double h = r.dir.y;
-	double i = r.dir.z;
+	g = r.dir.x;
+	h = r.dir.y;
+	i = r.dir.z;
 
-	double eihf = e * i - h * f;
-	double gfdi = g * f - d * i;
-	double dheg = d * h - e * g;
+	eihf = e*i - h*f;
+	gfdi = g*f - d*i;
+	dheg = d*h - e*g;
 
-	double M = a * eihf + b * gfdi + c * dheg;
+	M = a*eihf + b*gfdi + c*dheg;
 
 	if (M == 0)
 		return 0;
 
-	double j = p1.x - r.ori.x;
-	double k = p1.y - r.ori.y;
-	double l = p1.z - r.ori.z;
+	j = p1.x - r.ori.x;
+	k = p1.y - r.ori.y;
+	l = p1.z - r.ori.z;
 
-	double akjb = a * k - j * b;
-	double jcal = j * c - a * l;
-	double blkc = b * l - k * c;
+	akjb = a*k - j*b;
+	jcal = j*c - a*l;
+	blkc = b*l - k*c;
 
-	double t = -(f * akjb + e * jcal + d * blkc)/M;
+	t = -(f*akjb + e*jcal + d*blkc)/M;
 	if(t < 0)
 		return 0;
 
-	double gamma = (i * akjb + h * jcal + g * blkc)/M;
+	double gamma = (i*akjb + h*jcal + g*blkc)/M;
 	if(gamma < 0 || gamma > 1)
 		return 0;
 
-	double beta = (j * eihf + k * gfdi + l * dheg)/M;
+	double beta = (j*eihf + k*gfdi + l*dheg)/M;
 	if(beta < 0 || beta > 1 - gamma)
 		return 0;
 

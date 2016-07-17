@@ -1,9 +1,6 @@
 /*
  * Dallas Jones
  * Columbia University - Computer Graphics
- *
- * Modified version of Qi Wang's Raytra Camera class.
- * Copyright © 2016 Wang Qi. All rights reserved.
  */
 
 #ifndef _CAM_H
@@ -40,25 +37,24 @@ class Camera{
 
 	void set_uvw(const Vec &d);
 
-	Ray gen_ray(double i, double j);
-	Ray jitter(double i, double j, int p, int q, int samples);
+	Ray gen_ray(const double i, const double j);
+	Ray jitter(const double i, const double j, const int p, const int q, const int samples);
 
 	void render(vector<Object *> &objects, vector<Plane *> &planes,
 						const vector<Light *> &lights,
 						BVH *root,
-						int &p_samples,
-						int &s_samples,
-						int &bbox_flag);
+						const int p_samples,
+						const int s_samples,
+						const int bbox_flag);
 
 	Vec ray_color(const Ray &r, int depth, const vector<Light *> lights,
 						const vector<Object *> objects,
 						const vector<Plane *> planes,
 						BVH *root,
-						int p_samples,
-						int s_samples,
-						int &flag);
+						const int s_samples,
+						const int flag);
 
-	void set_pixel(int x, int y, double r, double g, double b)
+	void set_pixel(const int x, const int y, const double r, const double g, const double b)
 	{
 		Rgba &px = pixels[y][x];
 		px.r = r; px.g = g; px.b = b;
