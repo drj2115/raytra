@@ -6,15 +6,6 @@
 #include "cam.h"
 #include "parse.h"
 
-void deleteTree(BVH *root)
-{
-	if (root) {
-		deleteTree(dynamic_cast<BVH *>(root->left));
-		deleteTree(dynamic_cast<BVH *>(root->right));
-		delete root;
-	}
-}
-
 int main(int argc, char * argv[]) {
 	vector<Light *> lights;
 	vector<Object *> objects;
@@ -27,6 +18,7 @@ int main(int argc, char * argv[]) {
 	clock_t start_time = clock();
 #endif
 	BVH *root = NULL;
+
 	int p_samples = 1, s_samples = 1, flag = 3;
 
 	if (argc < 3) {
@@ -68,7 +60,7 @@ int main(int argc, char * argv[]) {
 	scene_cam->write_exr(argv[2]);
 
 	delete scene_cam;
-	deleteTree(root);
+	delete root;
 
 	for (unsigned int i = 0; i < materials.size(); ++i)
 		delete materials[i];

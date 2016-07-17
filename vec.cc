@@ -60,7 +60,7 @@ Vec& Vec::operator/=(double k)
 	x /= k;
 	y /= k;
 	z /= k;
-    return *this;
+	return *this;
 }
 
 double Vec::dot(const Vec &v) const

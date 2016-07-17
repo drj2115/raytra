@@ -116,9 +116,9 @@ Vec shading(const Ray &ray, const Vec &ie, const Vec &n, const Vec &il,
 					const int flag)
 {
 	int shadowed = 0;
+
 	if (root) {
-		if ((root->shadow_test(ray, it,	flag)) && (it.t < max_t))
-			shadowed = 1;
+		shadowed = root->intersect(ray, it, flag);
 	} else {
 		for (unsigned int i = 0; i < objects.size(); ++i) {
 			if (objects[i]->intersect(ray, it, flag)) {
@@ -141,8 +141,8 @@ Vec shading(const Ray &ray, const Vec &ie, const Vec &n, const Vec &il,
 		}
 	}
 
-	return shadowed == 0 ? m->phong_shading(ie, n, il, light->rgb) :
-							Vec(0, 0, 0);
+	return !shadowed ? m->phong_shading(ie, n, il, light->rgb) :
+							Vec();
 
 }
 
@@ -154,11 +154,9 @@ Vec Camera::ray_color(const Ray &r, int depth, const vector<Light *> lights,
 						const int flag)
 {
 	if (!depth)
-		return Vec(0.0, 0.0, 0.0);
+		return Vec();
 
-	Vec retrgb(0.0, 0.0, 0.0);
-	Vec rgb2(0,0,0);
-	Vec ambience(0,0,0);
+	Vec color;
 	Material *m = NULL;
 	Intersection it, tmp;
 
@@ -189,7 +187,7 @@ Vec Camera::ray_color(const Ray &r, int depth, const vector<Light *> lights,
 	}
 
 	if (!m)
-		return retrgb;
+		return color;
 
 	Vec p1 = it.point;
 	Vec sp;			/* Will be used only for square area lights */
@@ -203,7 +201,7 @@ Vec Camera::ray_color(const Ray &r, int depth, const vector<Light *> lights,
 		/* Ambient light: only calculate once */
 		if (type == 'a') {
 			if (depth == MAX_DEPTH)
-				ambience = lights[i]->rgb*m->diff;
+				color += lights[i]->rgb*m->diff;
 			continue;
 		}
 
@@ -215,6 +213,7 @@ Vec Camera::ray_color(const Ray &r, int depth, const vector<Light *> lights,
 
 		/* Square light: v, n, u are corners */
 		if (type == 's') {
+			Vec tmp;
 			for (int j = 0; j < s_samples; ++j) {
 				double r1 = (rand()%100 - 50)/100.;
 				double r2 = (rand()%100 - 50)/100.;
@@ -237,10 +236,10 @@ Vec Camera::ray_color(const Ray &r, int depth, const vector<Light *> lights,
 
 				irr /= ((max_t+1)*(max_t+1));
 				irr *= lights[i]->n.dot(il*-1);
-				rgb2 += irr;
+				tmp += irr;
 			}
 
-			rgb2 /= s_samples*s_samples;
+			color += tmp/s_samples;
 			continue;
 
 		/* Directional light: v is direction vector */
@@ -257,7 +256,7 @@ Vec Camera::ray_color(const Ray &r, int depth, const vector<Light *> lights,
 
 		s_ray.dir = il;
 
-		retrgb += shading(s_ray, ie, n, il, it,	max_t, objects, planes,
+		color += shading(s_ray, ie, n, il, it,	max_t, objects, planes,
 						lights[i], m, root, flag);
 	}
 
@@ -268,15 +267,11 @@ Vec Camera::ray_color(const Ray &r, int depth, const vector<Light *> lights,
 		/* Reflection ray */
 		Vec rfl = n*(2*(n.dot(ie))) - ie;
 		rfl.normalize();
-		Ray rray(p1, rfl);
-
-		retrgb += km*ray_color(rray, depth-1, lights, objects, planes,
-							root, 1, flag);
+		color += km*ray_color(Ray(p1, rfl), depth-1, lights, objects,
+							planes, root, 1, flag);
 	}
 
-	if (depth == MAX_DEPTH)
-		retrgb = retrgb + ambience;
-	return retrgb + rgb2;
+	return color;
 }
 
 void Camera::write_exr(const char *outfile) {

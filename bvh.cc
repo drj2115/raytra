@@ -45,6 +45,16 @@ BVH::BVH(vector<Object*> &objects, int l, int r, int axis) {
 	}
 }
 
+BVH::~BVH(void)
+{
+	if (left)
+		delete dynamic_cast<BVH *>(this->left);
+	left = NULL;
+	if (right)
+		delete dynamic_cast<BVH *>(this->right);
+	right = NULL;
+}
+
 void BVH::surround(const vector<Object*> &objects, int l, int r) {
 	double minx, miny, minz;
 	double maxx, maxy, maxz;
@@ -89,12 +99,11 @@ int BVH::intersect(const Ray &r, Intersection &it, int bboxOnly) {
 	return 1;
 }
 
-int BVH::shadow_test(const Ray &r, Intersection &it, int bboxOnly) {
-	if (!right)
-		return (left->intersect(r, it, bboxOnly) && (it.t > 0.0001));
-	if (!bbox.intersect(r, it))
-		return 0;
-	if (left->intersect(r, it, bboxOnly) && (it.t > 0.0001))
-		return 1;
-	return (right->intersect(r, it, bboxOnly) && (it.t > 0.0001));
+void delete_bvh(BVH *root)
+{
+	if (root) {
+		delete_bvh(dynamic_cast<BVH *>(root->left));
+		delete_bvh(dynamic_cast<BVH *>(root->right));
+		delete root;
+	}
 }

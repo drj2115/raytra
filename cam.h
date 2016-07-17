@@ -28,8 +28,8 @@ using namespace std;
 
 #define MAX_DEPTH 10
 
-class Camera{
-	public:
+class Camera {
+public:
 	Camera(void);
 	Camera(const Vec &p, const Vec &dir,
 		   double d, double iwidth, double iheight,
@@ -62,6 +62,7 @@ class Camera{
 
 	void write_exr(const char *file_name);
 
+private:
 	Vec eye, u, v, w;
 	double f_len, iw, ih;
 	int pw, ph;
