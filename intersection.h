@@ -11,7 +11,7 @@
 #include "ray.h"
 #include "material.h"
 
-class Intersection{
+class Intersection {
 public:
 	Intersection(void);
 	void set(double t1, const Vec &p1, const Vec &n);

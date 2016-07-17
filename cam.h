@@ -44,21 +44,13 @@ public:
 						const vector<Light *> &lights,
 						BVH *root,
 						const int p_samples,
-						const int s_samples,
-						const int bbox_flag);
+						const int s_samples);
 
 	Vec ray_color(const Ray &r, int depth, const vector<Light *> lights,
 						const vector<Object *> objects,
 						const vector<Plane *> planes,
 						BVH *root,
-						const int s_samples,
-						const int flag);
-
-void set_pixel(const int x, const int y, const double r, const double g, const double b)
-{
-	Rgba &px = pixels[y][x];
-	px.r = r; px.g = g; px.b = b;
-}
+						const int s_samples);
 
 	void write_exr(const char *file_name);
 

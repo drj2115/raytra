@@ -7,13 +7,11 @@
 #include "bbox.h"
 #include "intersection.h"
 
-#define EPSILON 0.000000001
-
 class Object {
 	public:
 	Object(void) { mat = NULL; min = Vec(); max = Vec(); bbox = Bbox(); }
 
-	virtual int intersect(const Ray &r, Intersection &it, int bboxOnly)
+	virtual int intersect(const Vec &r_ori, const Vec &r_dir, Intersection &it)
 	{
 		return 0;
 	}

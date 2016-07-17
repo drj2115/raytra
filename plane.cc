@@ -8,16 +8,16 @@ Plane::Plane(double nx, double ny, double nz,
 	mat = m;
 }
 
-int Plane::intersect(const Ray &r, Intersection &it, int bboxOnly){
-	double denominator = r.dir.dot(n);
-	if (!denominator)
+int Plane::intersect(const Vec &r_ori, const Vec &r_dir, Intersection &it)
+{
+	double denom = r_dir.dot(n);
+	if (!denom)
 		return 0;
 
-	double numerator = -(r.ori.dot(n) + d);
-	double t = numerator / denominator;
-	if (t > 0.0001) {
-		Vec p = r.ori + r.dir * t;
-		it.set(t, p, n);
+	double numer = -(r_ori.dot(n) + d);
+	double t = numer/denom;
+	if (t > EPSILON) {
+		it.set(t, r_ori + r_dir*t, n);
 		return 1;
 	}
 	return 0;

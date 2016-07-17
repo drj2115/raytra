@@ -1,6 +1,7 @@
 #include "sphere.h"
 
-Sphere::Sphere(Material *m, const Vec &p, double r){
+Sphere::Sphere(Material *m, const Vec &p, double r)
+{
 	mat = m;
 	center = p;
 	radius = r;
@@ -9,34 +10,31 @@ Sphere::Sphere(Material *m, const Vec &p, double r){
 	bbox = Bbox(min, max, -1);
 }
 
-int Sphere::intersect(const Ray &r, Intersection &it, int bboxOnly){
-
-	if(!bbox.intersect(r, it))
+int Sphere::intersect(const Vec &r_ori, const Vec &r_dir, Intersection &it)
+{
+	if (!bbox.intersect(r_ori, r_dir, it))
 		return 0;
 
-	if(bboxOnly)
+	if (bbox_only)
 		return 1;
 
-	Vec v = r.ori - center;
-	Vec d = r.dir;
+	Vec v = r_ori - center;
 
-	double tmp1 = d.dot(v);
-	double tmp2 = d.dot(d);
-	double tmp3 = v.dot(v) - radius*radius;
-	double desc = tmp1 * tmp1 - tmp2 * tmp3;
+	double tmp1 = r_dir.dot(v);
+	double tmp2 = r_dir.dot(r_dir);
+	double disc = tmp1*tmp1 - tmp2*(v.dot(v) - radius*radius);
 
-	if(desc >= 0){
+	if (disc >= 0) {
 		double t1;
-		Vec dneg = d * (-1);
-		if(desc == 0)
-			t1 = dneg.dot(v)/tmp2;
+
+		if (!disc)
+			t1 = r_dir.dot(v*-1)/tmp2;
 		else
-			t1 = (dneg.dot(v) - sqrt(desc))/tmp2;
+			t1 = (r_dir.dot(v*-1) - sqrt(disc))/tmp2;
 
-		Vec p1 = r.ori + r.dir * t1;
-		Vec n = get_normal(p1);
+		Vec p1 = r_ori + r_dir*t1;
 
-		it.set(t1, p1, n);
+		it.set(t1, p1, get_normal(p1));
 		return 1;
 	}
 	return 0;

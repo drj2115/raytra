@@ -4,7 +4,7 @@
 #include "vec.h"
 
 class Ray {
-        public:
+public:
         Ray(const Vec &a = Vec(), const Vec &b = Vec());
         Ray(const Ray &a);
         ~Ray(void) {};

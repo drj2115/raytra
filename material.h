@@ -11,7 +11,7 @@
 using namespace std;
 
 class Material{
-	public:
+public:
 	Material(void);
 	Material(double dr, double dg, double db,
 			 double sr, double sg, double sb,

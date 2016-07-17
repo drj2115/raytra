@@ -6,6 +6,8 @@
 #include "cam.h"
 #include "parse.h"
 
+int bbox_only;
+
 int main(int argc, char * argv[]) {
 	vector<Light *> lights;
 	vector<Object *> objects;
@@ -54,9 +56,10 @@ int main(int argc, char * argv[]) {
 		flag = (flag == 3) ? 0 : 1;
 	}
 
-	Camera *scene_cam = cameras[0];
+	bbox_only = flag;
 
-	scene_cam->render(objects, planes, lights, root, p_samples, s_samples, flag);
+	Camera *scene_cam = cameras[0];
+	scene_cam->render(objects, planes, lights, root, p_samples, s_samples);
 	scene_cam->write_exr(argv[2]);
 
 	delete scene_cam;

@@ -1,18 +1,23 @@
 #include "bvh.h"
 
-inline int cmp_x(Object *a, Object *b) {
+inline int cmp_x(Object *a, Object *b)
+{
 	return a->bbox.max_p.x < b->bbox.max_p.x;
 }
 
-inline int cmp_y(Object *a, Object *b) {
+inline int cmp_y(Object *a, Object *b)
+{
 	return a->bbox.max_p.y < b->bbox.max_p.y;
 }
 
-inline int cmp_z(Object *a, Object *b) {
+inline int cmp_z(Object *a, Object *b)
+{
 	return a->bbox.max_p.z < b->bbox.max_p.z;
 }
 
-BVH::BVH(vector<Object*> &objects, int l, int r, int axis) {
+
+BVH::BVH(vector<Object*> &objects, int l, int r, int axis)
+{
 	if (l == r) {
 		left = objects[l];
 		left->bbox.id = l;
@@ -26,19 +31,19 @@ BVH::BVH(vector<Object*> &objects, int l, int r, int axis) {
 			right->bbox.id = r;
 		} else {
 			int mid = l + (r - l) / 2;
-			if (axis == 0) {
+			if (axis == 0)
 				nth_element(	objects.begin() + l,
 						objects.begin() + mid,
 						objects.begin() + r + 1, cmp_x);
-			} else if (axis == 1) {
+			else if (axis == 1)
 				nth_element(	objects.begin() + l,
 						objects.begin() + mid,
 						objects.begin() + r + 1, cmp_y);
-			} else if (axis == 2) {
+			else if (axis == 2)
 				nth_element(	objects.begin() + l,
 						objects.begin() + mid,
 						objects.begin() + r + 1, cmp_z);
-			}
+
 			left = new BVH(objects, l, mid, (axis + 1) % 3);
 			right = new BVH(objects, mid + 1, r, (axis + 1) % 3);
 		}
@@ -55,7 +60,8 @@ BVH::~BVH(void)
 	right = NULL;
 }
 
-void BVH::surround(const vector<Object*> &objects, int l, int r) {
+void BVH::surround(const vector<Object*> &objects, int l, int r)
+{
 	double minx, miny, minz;
 	double maxx, maxy, maxz;
 
@@ -75,16 +81,17 @@ void BVH::surround(const vector<Object*> &objects, int l, int r) {
 		Vec(maxx + EPSILON, maxy + EPSILON, maxz + EPSILON), -1);
 }
 
-int BVH::intersect(const Ray &r, Intersection &it, int bboxOnly) {
+int BVH::intersect(const Vec &r_ori, const Vec &r_dir, Intersection &it)
+{
 	if (!right)
-		return (left->intersect(r, it, bboxOnly) && (it.t > 0.0001));
+		return left->intersect(r_ori, r_dir, it) && it.t > EPSILON;
 
-	if (!bbox.intersect(r, it))
+	if (!bbox.intersect(r_ori, r_dir, it))
 		return 0;
 
 	Intersection lIt, rIt;
-	int lHit = left->intersect(r, lIt, bboxOnly) && lIt.t > 0.0001;
-	int rHit = right->intersect(r, rIt, bboxOnly) && rIt.t > 0.0001;
+	int lHit = left->intersect(r_ori, r_dir, lIt) && lIt.t > EPSILON;
+	int rHit = right->intersect(r_ori, r_dir, rIt) && rIt.t > EPSILON;
 
 	if (!lHit && !rHit)
 		return 0;
@@ -97,6 +104,7 @@ int BVH::intersect(const Ray &r, Intersection &it, int bboxOnly) {
 		it = rIt;
 
 	return 1;
+
 }
 
 void delete_bvh(BVH *root)

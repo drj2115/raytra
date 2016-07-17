@@ -5,83 +5,63 @@ Triangle::Triangle(const double x1, const double y1, const double z1,
 		   const double x3, const double y3, const double z3,
 							Material *m)
 {
+	double min_x, min_y, min_z, max_x, max_y, max_z;
+
 	p1 = Vec(x1, y1, z1);
 	p2 = Vec(x2, y2, z2);
 	p3 = Vec(x3, y3, z3);
 
-	a = x1 - x2;
-	b = y1 - y2;
-	c = z1 - z2;
-	d = x1 - x3;
-	e = y1 - y3;
-	f = z1 - z3;
+	p1_p2 = p1 - p2;
+	p1_p3 = p1 - p3;
 
-	n = (p2-p1).cross(p3-p1);
-	n.normalize();
+	v1 = v2 = Vec();
+
+	(n = p1_p2.cross(p1_p3)).normalize();
 	mat = m;
 
-	float minX = x1 < x2 ? x1 : x2;
-	minX = minX < x3 ? minX : x3;
-	float minY = y1 < y2 ? y1 : y2;
-	minY = minY < y3 ? minY : y3;
-	float minZ = z1 < z2 ? z1 : z2;
-	minZ = minZ < z3 ? minZ : z3;
+	min_x = x1 < x2 ? x1 : x2;
+	min_x = min_x < x3 ? min_x : x3;
+	min_y = y1 < y2 ? y1 : y2;
+	min_y = min_y < y3 ? min_y : y3;
+	min_z = z1 < z2 ? z1 : z2;
+	min_z = min_z < z3 ? min_z : z3;
 
-	float maxX = x1 > x2 ? x1 : x2;
-	maxX = maxX > x3 ? maxX : x3;
-	float maxY = y1 > y2 ? y1 : y2;
-	maxY = maxY > y3 ? maxY : y3;
-	float maxZ = z1 > z2 ? z1 : z2;
-	maxZ = maxZ > z3 ? maxZ : z3;
+	max_x = x1 > x2 ? x1 : x2;
+	max_x = max_x > x3 ? max_x : x3;
+	max_y = y1 > y2 ? y1 : y2;
+	max_y = max_y > y3 ? max_y : y3;
+	max_z = z1 > z2 ? z1 : z2;
+	max_z = max_z > z3 ? max_z : z3;
 
-	min = Vec(minX - EPSILON, minY - EPSILON, minZ - EPSILON);
-	max = Vec(maxX + EPSILON, maxY + EPSILON, maxZ + EPSILON);
+	min = Vec(min_x - EPSILON, min_y - EPSILON, min_z - EPSILON);
+	max = Vec(max_x + EPSILON, max_y + EPSILON, max_z + EPSILON);
 	bbox = Bbox(min, max, -1);
 }
 
-int Triangle::intersect(const Ray &r, Intersection &it, int bboxOnly)
+int Triangle::intersect(const Vec &r_ori, const Vec &r_dir, Intersection &it)
 {
-
-	if (!bbox.intersect(r, it))
+	if (!bbox.intersect(r_ori, r_dir, it))
 		return 0;
 
-	if (bboxOnly)
+	if (bbox_only)
 		return 1;
 
-	g = r.dir.x;
-	h = r.dir.y;
-	i = r.dir.z;
+	v1 = p1_p3.cross(r_dir);
 
-	eihf = e*i - h*f;
-	gfdi = g*f - d*i;
-	dheg = d*h - e*g;
-
-	M = a*eihf + b*gfdi + c*dheg;
-
-	if (M == 0)
+	if (!(M = 1./p1_p2.dot(v1)))
 		return 0;
 
-	j = p1.x - r.ori.x;
-	k = p1.y - r.ori.y;
-	l = p1.z - r.ori.z;
+	v2 = p1_p2.cross(p1 - r_ori);
 
-	akjb = a*k - j*b;
-	jcal = j*c - a*l;
-	blkc = b*l - k*c;
-
-	t = -(f*akjb + e*jcal + d*blkc)/M;
-	if(t < 0)
+	if ((t = -(v2.dot(p1_p3))*M) < 0)
 		return 0;
 
-	double gamma = (i*akjb + h*jcal + g*blkc)/M;
-	if(gamma < 0 || gamma > 1)
+	if ((gamma = (v2.dot(r_dir))*M) < 0 || gamma > 1)
 		return 0;
 
-	double beta = (j*eihf + k*gfdi + l*dheg)/M;
-	if(beta < 0 || beta > 1 - gamma)
+	if ((beta = ((p1-r_ori).dot(v1))*M) < 0 || (beta > 1 - gamma))
 		return 0;
 
-	Vec p = r.ori + r.dir * t;
-	it.set(t, p, n);
+	it.set(t, r_ori + r_dir*t, n);
 	return 1;
 }

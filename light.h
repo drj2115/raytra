@@ -9,7 +9,7 @@
 #include "ray.h"
 
 class Light {
-        public:
+public:
         Light(	char t = 'p',
 		const Vec &v1 = Vec(),
 		const Vec &color = Vec(),

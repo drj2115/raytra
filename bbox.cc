@@ -1,27 +1,21 @@
 #include "bbox.h"
 
-void swap(double &a, double &b)
+int Bbox::intersect(const Vec &r_ori, const Vec &r_dir, Intersection &it)
 {
-	double temp = a;
-	a = b;
-	b = temp;
-}
+	double dx = 1/r_dir.x;
+	double dy = 1/r_dir.y;
 
-int Bbox::intersect(const Ray &ray, Intersection &it){
-	double dx = 1/ray.dir.x;
-	double dy = 1/ray.dir.y;
-
-	double txmin = (min_p.x - ray.ori.x) * dx;
-	double txmax = (max_p.x - ray.ori.x) * dx;
+	double txmin = (min_p.x - r_ori.x) * dx;
+	double txmax = (max_p.x - r_ori.x) * dx;
 
 	if(dx < 0)
-		swap(txmin, txmax);
+		std::swap(txmin, txmax);
 
-	double tymin = (min_p.y - ray.ori.y) * dy;
-	double tymax = (max_p.y - ray.ori.y) * dy;
+	double tymin = (min_p.y - r_ori.y) * dy;
+	double tymax = (max_p.y - r_ori.y) * dy;
 
 	if(dy < 0)
-		swap(tymin, tymax);
+		std::swap(tymin, tymax);
 
 	if(txmin > tymax || tymin > txmax)
 		return 0;
@@ -29,14 +23,14 @@ int Bbox::intersect(const Ray &ray, Intersection &it){
 	double tmin = txmin > tymin ? txmin : tymin;
 	double tmax = txmax < tymax ? txmax : tymax;
 
-	double dz = 1/ray.dir.z;
+	double dz = 1/r_dir.z;
 	double tzmin, tzmax;
 
-	tzmin = (min_p.z - ray.ori.z) * dz;
-	tzmax = (max_p.z - ray.ori.z) * dz;
+	tzmin = (min_p.z - r_ori.z)*dz;
+	tzmax = (max_p.z - r_ori.z)*dz;
 
 	if(dz < 0)
-		swap(tzmin, tzmax);
+		std::swap(tzmin, tzmax);
 
 	if(tmin > tzmax || tzmin > tmax)
 		return 0;
@@ -48,25 +42,30 @@ int Bbox::intersect(const Ray &ray, Intersection &it){
 
 	if (tmax > tmin) {
 		Vec n;
-		if(tmin - txmin > -EPS && tmin - txmin < EPS)
+		if (fabs(txmin - tmin) < EPSILON)
 			n = dx > 0? Vec(-1, 0, 0) : Vec(1, 0, 0);
-		else if(tmin - tymin > -EPS && tmin - tymin < EPS)
+		else if (fabs(tymin - tmin) < EPSILON)
 			n = dy > 0? Vec(0, -1, 0) : Vec(0, 1, 0);
-		else if(tmin - tzmin > -EPS && tmin - tzmin < EPS)
+		else if (fabs(tzmin - tmin) < EPSILON)
 			n = dz > 0? Vec(0, 0, -1) : Vec(0, 0, 1);
 		else
 			return 0;
 
-		it.set(tmin, ray.ori + ray.dir*tmin, n);
+		if (bbox_only)
+			it.set(tmin, r_ori + r_dir*tmin, n);
+
 		if (id != -1)
 			it.id = id;
 
 		return 1;
 	}
+
+
 	return 0;
 }
 
-void Bbox::print(char *str1, char *str2){
+void Bbox::print(char *str1, char *str2)
+{
 	min_p.print(str1);
 	max_p.print(str2);
 }

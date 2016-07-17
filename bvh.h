@@ -17,7 +17,7 @@ public:
 	~BVH(void);
 	BVH(vector<Object*> &objects, int l, int r, int axis);
 	void surround(const vector<Object*> &objects, int l, int r);
-	int intersect(const Ray &r, Intersection &it, int bboxOnly);
+	int intersect(const Vec &r_ori, const Vec &r_dir, Intersection &it);
 
 	Object *left, *right;
 };
